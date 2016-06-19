@@ -169,7 +169,9 @@ def trace(f):
     @asyncio.coroutine
     def wrapper(*args, **kwargs):
         trace_id = TraceCollector.trace_start(f)
-        response = yield from f(*args, **kwargs)
+        response = f(*args, **kwargs)
+        if asyncio.iscoroutine(response):
+            response = yield from response
         yield from TraceCollector.trace_end(trace_id)
         return response
     return wrapper
