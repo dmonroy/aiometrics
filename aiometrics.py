@@ -19,10 +19,13 @@ class BaseStreamDriver(metaclass=abc.ABCMeta):
 
 class StdoutDriver(BaseStreamDriver):
     """Print stream reports to stdout"""
+    def __init__(self):
+        import json
+        self.json = json
 
     def stream(self, report):
         """print trace reports to stdout"""
-        print(report)
+        print(self.json.dumps(report))
 
 
 class LogDriver(BaseStreamDriver):
