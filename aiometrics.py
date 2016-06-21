@@ -1,6 +1,7 @@
 import abc
 import asyncio
 import logging
+import os
 import socket
 import uuid
 from collections import OrderedDict
@@ -43,6 +44,33 @@ class LogDriver(BaseStreamDriver):
     def stream(self, report):
         """Stream reports to application logs"""
         self.logger.info(self.json.dumps(report))
+
+
+class PrometheusPushGatewayDriver(BaseStreamDriver):
+    """Stream reports to prometheus pushgateway"""
+    def __init__(self, name, url):
+        import aiohttp
+        self.name = name
+        self.url = os.path.join(url, 'metrics/job', self.name)
+        self.ClientSession = aiohttp.ClientSession
+
+    @asyncio.coroutine
+    def stream(self, report):
+        """Stream reports to application logs"""
+        with self.ClientSession() as session:
+            lines = []
+            for job in report['traces']:
+                key = '%s:%s' % (self.name, job)
+                for minute in report['traces'][job]:
+                    for k, v in report['traces'][job][minute].items():
+                        lines.append('# TYPE %s_%s gauge' % (key, k))
+                        lines.append('%s_%s %0.2f' % (key, k, v))
+
+            # Empty is required at the end of the payload
+            lines.append("")
+            data = "\n".join(lines)
+            logger.info(data)
+            yield from session.post(self.url, data=bytes(data.encode('utf-8')))
 
 
 class TraceCollector:
