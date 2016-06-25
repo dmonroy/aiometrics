@@ -11,5 +11,8 @@ setup(
     description='Generate metrics from AsyncIO applications',
     setup_requires=[
         'setuptools_scm'
+    ],
+    install_requiers=[
+        'crontab'
     ]
 )
