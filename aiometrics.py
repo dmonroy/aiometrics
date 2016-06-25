@@ -1,5 +1,6 @@
 import abc
 import asyncio
+import json
 import logging
 import os
 import socket
@@ -20,30 +21,24 @@ class BaseStreamDriver(metaclass=abc.ABCMeta):
 
 class StdoutDriver(BaseStreamDriver):
     """Print stream reports to stdout"""
-    def __init__(self):
-        import json
-        self.json = json
 
     def stream(self, report):
         """print trace reports to stdout"""
-        print(self.json.dumps(report))
+        print(json.dumps(report))
 
 
 class LogDriver(BaseStreamDriver):
     """Stream reports to application logs"""
     def __init__(self, logger=None, name='aiometrics.LogDriver', log_level=logging.INFO):
-        import json
         if logger is None:
             self.logger = logging.getLogger(name)
             self.logger.setLevel(log_level)
         else:
             self.logger = logger
 
-        self.json = json
-
     def stream(self, report):
         """Stream reports to application logs"""
-        self.logger.info(self.json.dumps(report))
+        self.logger.info(json.dumps(report))
 
 
 class PrometheusPushGatewayDriver(BaseStreamDriver):
