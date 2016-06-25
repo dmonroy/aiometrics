@@ -12,7 +12,8 @@ setup(
     setup_requires=[
         'setuptools_scm'
     ],
-    install_requiers=[
+    install_requires=[
+        'aiohttp',
         'crontab'
     ]
 )
