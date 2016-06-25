@@ -172,25 +172,20 @@ class TraceCollector:
         for trace in traces:
             key = trace['key']
             if key not in data:
-                data[key] = {}
+                data[key] = []
                 stats[key] = {}
-            stt = trace['start_time']
-            minute_key = stt.strftime('%Y-%m-%dT%H:%M:00+00')
-            if minute_key not in data[key]:
-                data[key][minute_key] = []
-            data[key][minute_key].append(trace['total_time'])
+
+            data[key].append(trace['total_time'])
             cls._traces.pop(trace['id'])
 
         for key in data:
-            for minute in data[key]:
-                times = data[key][minute]
-                minute_stats = dict(
-                    count=len(times),
-                    max=max(times),
-                    min=min(times),
-                    avg=sum(times)/len(times)
-                )
-                stats[key][minute] = minute_stats
+            times = data[key]
+            stats[key] = dict(
+                count=len(times),
+                max=max(times),
+                min=min(times),
+                avg=sum(times)/len(times)
+            )
 
         return stats
 
