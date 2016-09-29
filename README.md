@@ -52,7 +52,7 @@ Here is the sample output:
 {"instance": {"hostname": "dmo.local", "id": "acf9842e-c127-4844-8026-d7c518076ac2"}, "traces": {"__main__:echo_delay": {"2016-06-20T23:56:00+00": {"count": 24, "avg": 2510.3998333333334, "min": 229.113, "max": 4986.661}}}}
 ```
 
-This generates a _per-minute_ report listing metrics for every coroutine function decorated with `@aiometrics.trace`. Metrics include:
+This generates a _per-minute_ report listing metrics for every coroutine function decorated with `@aiometrics.trace`. Metrics include (per minute):
 
 - Total number of executions
 - Minimum execution time
