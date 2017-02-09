@@ -173,6 +173,28 @@ class TraceCollector:
         return trace_id
 
     @classmethod
+    def trace_exception(cls, exception, func):
+        if not cls.initialized():
+            cls.setup()
+
+        trace_id = cls.generate_id()
+        ex_class = exception.__class__.__name__
+        ex_lines = str(exception).splitlines()
+        ex_label = '{}({})'.format(
+            ex_class, ex_lines[0] if len(ex_lines) else None
+        )
+        key = 'Exception:{}:{}:{}'.format(
+            func.__module__, func.__qualname__, ex_label
+        )
+        cls._traces[trace_id] = dict(
+            id=trace_id,
+            key=key,
+            start_time=datetime.utcnow(),
+            end_time=datetime.utcnow(),
+            total_time=0
+        )
+
+    @classmethod
     @asyncio.coroutine
     def trace_end(cls, trace_id):
         trace = cls._traces[trace_id]
@@ -248,9 +270,13 @@ def trace(f):
     @asyncio.coroutine
     def wrapper(*args, **kwargs):
         trace_id = TraceCollector.trace_start(f)
-        response = f(*args, **kwargs)
-        if asyncio.iscoroutine(response):
-            response = yield from response
+        try:
+            response = f(*args, **kwargs)
+            if asyncio.iscoroutine(response):
+                response = yield from response
+        except Exception as e:
+            TraceCollector.trace_exception(e, f)
+            raise e
         yield from TraceCollector.trace_end(trace_id)
         return response
     return wrapper
